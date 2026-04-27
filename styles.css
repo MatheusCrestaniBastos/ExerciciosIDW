@@ -1,0 +1,332 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;600;700&family=Inter:wght@300;400&display=swap');
+
+:root {
+  --preto: #0a0a0a;
+  --branco: #f5f5f5;
+  --cinza: #1a1a1a;
+  --cinza-medio: #2d2d2d;
+  --cinza-claro: #888;
+  --dourado: #c9a84c;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--preto);
+  color: var(--branco);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background com textura */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.012) 40px,
+      rgba(255,255,255,0.012) 41px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== HEADER ===== */
+header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 3rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(12px);
+}
+
+.header-logo {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.4rem;
+  letter-spacing: 4px;
+  color: var(--branco);
+}
+
+.header-ano {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 300;
+  color: var(--cinza-claro);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem 3rem;
+  text-align: center;
+}
+
+/* Linha decorativa acima do título */
+.hero::before {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--branco);
+  margin: 0 auto 2.5rem;
+}
+
+.titulo-fiel {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(3.5rem, 10vw, 8rem);
+  letter-spacing: 6px;
+  line-height: 0.9;
+  text-transform: uppercase;
+  color: var(--branco);
+  animation: fadeDown 0.9s ease both;
+}
+
+.titulo-fiel span {
+  display: block;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 300;
+  font-size: clamp(1rem, 3vw, 1.6rem);
+  letter-spacing: 10px;
+  color: var(--cinza-claro);
+  margin-top: 0.6rem;
+  text-transform: uppercase;
+  animation: fadeDown 0.9s ease 0.2s both;
+}
+
+/* ===== IMAGEM ===== */
+.imagem-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 2rem 1rem;
+  animation: fadeUp 1s ease 0.4s both;
+}
+
+.imagem-frame {
+  position: relative;
+  display: inline-block;
+}
+
+/* Bordas decorativas nos cantos */
+.imagem-frame::before,
+.imagem-frame::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-color: var(--branco);
+  border-style: solid;
+  z-index: 2;
+  opacity: 0.6;
+}
+
+.imagem-frame::before {
+  top: -8px;
+  left: -8px;
+  border-width: 2px 0 0 2px;
+  border-radius: 4px 0 0 0;
+}
+
+.imagem-frame::after {
+  bottom: -8px;
+  right: -8px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 4px 0;
+}
+
+.imagem-principal {
+  width: min(520px, 90vw);
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 20px;
+  display: block;
+  filter: grayscale(15%) contrast(1.08);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08),
+    0 30px 80px rgba(0,0,0,0.9),
+    0 10px 30px rgba(0,0,0,0.6);
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.imagem-principal:hover {
+  filter: grayscale(0%) contrast(1.05);
+  transform: scale(1.015);
+}
+
+/* Badge sobre a imagem */
+.badge-imagem {
+  position: absolute;
+  top: 2.8rem;
+  right: -12px;
+  background: var(--branco);
+  color: var(--preto);
+  font-family: 'Bebas Neue', cursive;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  padding: 0.35rem 0.8rem;
+  border-radius: 4px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}
+
+/* Legenda */
+.legenda {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cinza-claro);
+  margin-top: 1.2rem;
+}
+
+/* ===== STATS / CARDS ===== */
+.stats-section {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+  padding: 4rem 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: var(--cinza);
+  padding: 2.5rem 3rem;
+  text-align: center;
+  flex: 1;
+  min-width: 160px;
+  max-width: 220px;
+  border-top: 2px solid rgba(255,255,255,0.15);
+  transition: background 0.3s ease;
+  animation: fadeUp 0.8s ease both;
+}
+
+.stat-card:hover {
+  background: var(--cinza-medio);
+}
+
+.stat-numero {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--branco);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cinza-claro);
+  margin-top: 0.5rem;
+  display: block;
+}
+
+/* ===== CITAÇÃO ===== */
+.citacao-section {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 3rem 5rem;
+  text-align: center;
+}
+
+.citacao-section blockquote {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 300;
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  line-height: 1.5;
+  color: var(--branco);
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.citacao-section blockquote::before {
+  content: '"';
+  font-family: 'Bebas Neue', cursive;
+  font-size: 8rem;
+  color: rgba(255,255,255,0.06);
+  position: absolute;
+  top: -2rem;
+  left: -1rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.citacao-autor {
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cinza-claro);
+  margin-top: 1.5rem;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 2rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+footer p {
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+}
+
+.sccp {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 1.1rem;
+  letter-spacing: 4px;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* stagger nos cards */
+.stat-card:nth-child(1) { animation-delay: 0.5s; }
+.stat-card:nth-child(2) { animation-delay: 0.65s; }
+.stat-card:nth-child(3) { animation-delay: 0.8s; }
+.stat-card:nth-child(4) { animation-delay: 0.95s; }
