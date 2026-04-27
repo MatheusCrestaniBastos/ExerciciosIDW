@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de IMC</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :root {
+      --bg:       #f8fafb;
+      --white:    #ffffff;
+      --ink:      #0e1521;
+      --muted:    #8493a8;
+      --border:   #e4eaf2;
+
+      /* faixas de IMC */
+      --c-mg:   #6c2bd9;   /* muito grave */
+      --c-g:    #b44ff3;   /* grave */
+      --c-bp:   #3b82f6;   /* baixo peso */
+      --c-ok:   #22c55e;   /* normal */
+      --c-sp:   #f59e0b;   /* sobrepeso */
+      --c-o1:   #f97316;   /* obesidade I */
+      --c-o2:   #ef4444;   /* obesidade II */
+      --c-o3:   #991b1b;   /* obesidade III */
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2.5rem 1.5rem 4rem;
+      gap: 1.5rem;
+    }
+
+    /* ── TÍTULO ── */
+    .page-title {
+      text-align: center;
+    }
+
+    .page-title h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.5px;
+    }
+
+    .page-title p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── WIZARD (passos) ── */
+    .wizard {
+      width: min(500px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* barra de progresso */
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--ink);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .progress-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* ── CARD DE PASSO ── */
+    .step-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      display: none;
+      flex-direction: column;
+      gap: 1.4rem;
+      animation: fadeIn 0.35s ease both;
+      box-shadow: 0 4px 24px rgba(14,21,33,0.07);
+    }
+
+    .step-card.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .step-question {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    .step-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: -0.6rem;
+    }
+
+    /* input */
+    .step-input {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ink);
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .step-input::placeholder { color: #c0cada; font-weight: 400; }
+
+    .step-input:focus {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 4px rgba(14,21,33,0.06);
+    }
+
+    .step-input.error {
+      border-color: #ef4444;
+      background: #fff8f8;
+    }
+
+    .error-msg {
+      font-size: 0.75rem;
+      color: #ef4444;
+      font-weight: 500;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+
+    /* botão */
+    .btn-next {
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.9rem 1.5rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-next:hover {
+      background: #1e2d45;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(14,21,33,0.2);
+    }
+
+    /* ── RESULTADO ── */
+    #stepResult {
+      gap: 1.8rem;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .result-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .result-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .result-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+
+    /* saída formatada (requisito h) */
+    .result-sentence {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      color: var(--ink);
+    }
+
+    .result-sentence .var {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+
+    /* métrica grande */
+    .imc-display {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+
+    .imc-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .imc-unit {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding-bottom: 0.6rem;
+      font-weight: 500;
+    }
+
+    /* badge de classificação */
+    .classif-badge {
+      display: inline-block;
+      border-radius: 8px;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* régua visual */
+    .scale-bar {
+      display: flex;
+      height: 10px;
+      border-radius: 99px;
+      overflow: hidden;
+      gap: 2px;
+    }
+
+    .scale-seg {
+      flex: 1;
+      border-radius: 3px;
+      opacity: 0.3;
+      transition: opacity 0.3s;
+    }
+
+    .scale-seg.active { opacity: 1; }
+
+    .scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.6rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+      font-weight: 600;
+    }
+
+    /* detalhes adicionais */
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+    }
+
+    .detail-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .detail-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .detail-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* botão recalcular */
+    .btn-reset {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.8rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover { border-color: var(--ink); background: var(--bg); }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">
+    <h1>Calculadora de IMC</h1>
+    <p>Índice de Massa Corporal — Responda as 3 perguntas abaixo</p>
+  </div>
+
+  <div class="wizard">
+
+    <!-- PROGRESSO -->
+    <div style="display:flex;flex-direction:column;gap:0.3rem">
+      <div class="progress-label" id="progressLabel">Passo 1 de 3</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <!-- PASSO 1 — NOME -->
+    <div class="step-card active" id="step1">
+      <span class="step-num">Passo 01</span>
+      <div class="step-question">Qual é o seu nome?</div>
+      <input class="step-input" type="text" id="inputNome" placeholder="Ex: Maria Silva" autocomplete="off" />
+      <span class="error-msg" id="erroNome">Por favor, informe seu nome.</span>
+      <button class="btn-next" onclick="irPasso2()">Continuar →</button>
+    </div>
+
+    <!-- PASSO 2 — ALTURA -->
+    <div class="step-card" id="step2">
+      <span class="step-num">Passo 02</span>
+      <div class="step-question">Qual é a sua altura?</div>
+      <p class="step-hint">Informe em <strong>centímetros</strong> (ex: 175 para 1,75 m).</p>
+      <input class="step-input" type="number" id="inputAltura" placeholder="Ex: 175" min="50" max="280" />
+      <span class="error-msg" id="erroAltura">Informe uma altura válida (entre 50 e 280 cm).</span>
+      <button class="btn-next" onclick="irPasso3()">Continuar →</button>
+    </div>
+
+    <!-- PASSO 3 — PESO -->
+    <div class="step-card" id="step3">
+      <span class="step-num">Passo 03</span>
+      <div class="step-question">Qual é o seu peso?</div>
+      <p class="step-hint">Informe em <strong>quilogramas</strong> (ex: 70.5 para 70,5 kg).</p>
+      <input class="step-input" type="number" id="inputPeso" placeholder="Ex: 70.5" min="1" max="500" step="0.1" />
+      <span class="error-msg" id="erroPeso">Informe um peso válido (entre 1 e 500 kg).</span>
+      <button class="btn-next" onclick="calcularIMC()">Calcular IMC →</button>
+    </div>
+
+    <!-- PASSO 4 — RESULTADO -->
+    <div class="step-card" id="stepResult">
+      <span class="step-num">Resultado</span>
+
+      <!-- cabeçalho com nome -->
+      <div class="result-header">
+        <div class="result-avatar" id="resultAvatar">😊</div>
+        <div>
+          <div class="result-name" id="resultNome"></div>
+          <div class="result-sub" id="resultSub"></div>
+        </div>
+      </div>
+
+      <!-- SAÍDA FORMATADA (requisito h) -->
+      <div class="result-sentence" id="resultSentence"></div>
+
+      <!-- IMC grande -->
+      <div>
+        <div class="detail-label" style="margin-bottom:0.5rem">Índice de Massa Corporal</div>
+        <div class="imc-display">
+          <span class="imc-number" id="imcNumero"></span>
+          <span class="imc-unit">kg/m²</span>
+        </div>
+        <span class="classif-badge" id="classifBadge" style="margin-top:0.6rem;display:inline-block"></span>
+      </div>
+
+      <!-- RÉGUA VISUAL -->
+      <div>
+        <div class="scale-bar" id="scalebar"></div>
+        <div class="scale-labels">
+          <span>&lt;16</span>
+          <span>18.5</span>
+          <span>25</span>
+          <span>30</span>
+          <span>35</span>
+          <span>40+</span>
+        </div>
+      </div>
+
+      <!-- DETALHES -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="detail-label">Altura</span>
+          <span class="detail-val" id="detAltura"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Peso</span>
+          <span class="detail-val" id="detPeso"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Altura²</span>
+          <span class="detail-val" id="detAlturaQ"></span>
+        </div>
+      </div>
+
+      <button class="btn-reset" onclick="reiniciar()">↺ Calcular novamente</button>
+    </div>
+
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════
+    //  CLASSIFICAÇÕES DO IMC
+    // ══════════════════════════════════════════════
+    const faixas = [
+      { limite: 16,    label: 'Baixo peso muito grave', cor: '#6c2bd9', emoji: '⚠️', idx: 0 },
+      { limite: 17,    label: 'Baixo peso grave',       cor: '#b44ff3', emoji: '⚠️', idx: 1 },
+      { limite: 18.5,  label: 'Baixo peso',             cor: '#3b82f6', emoji: '😟', idx: 2 },
+      { limite: 25,    label: 'Peso normal',             cor: '#22c55e', emoji: '😊', idx: 3 },
+      { limite: 30,    label: 'Sobrepeso',               cor: '#f59e0b', emoji: '😐', idx: 4 },
+      { limite: 35,    label: 'Obesidade grau I',        cor: '#f97316', emoji: '😟', idx: 5 },
+      { limite: 40,    label: 'Obesidade grau II',       cor: '#ef4444', emoji: '😟', idx: 6 },
+      { limite: Infinity, label: 'Obesidade grau III',  cor: '#991b1b', emoji: '🚨', idx: 7 },
+    ];
+
+    function classificar(m) {
+      for (const f of faixas) {
+        if (m < f.limite) return f;
+      }
+      return faixas[faixas.length - 1];
+    }
+
+    // ══════════════════════════════════════════════
+    //  NAVEGAÇÃO ENTRE PASSOS
+    // ══════════════════════════════════════════════
+    function mostrarPasso(num) {
+      ['step1','step2','step3','stepResult'].forEach(id => {
+        document.getElementById(id).classList.remove('active');
+      });
+
+      const ids = ['step1','step2','step3','stepResult'];
+      document.getElementById(ids[num - 1]).classList.add('active');
+
+      const total = 3;
+      if (num <= total) {
+        document.getElementById('progressLabel').textContent = `Passo ${num} de ${total}`;
+        document.getElementById('progressFill').style.width = `${((num - 1) / total) * 100}%`;
+      } else {
+        document.getElementById('progressLabel').textContent = 'Concluído!';
+        document.getElementById('progressFill').style.width = '100%';
+      }
+    }
+
+    function irPasso2() {
+      const nome = document.getElementById('inputNome').value.trim();
+      const erro = document.getElementById('erroNome');
+      const inp  = document.getElementById('inputNome');
+
+      if (!nome) {
+        inp.classList.add('error');
+        erro.classList.add('show');
+        inp.focus();
+        return;
+      }
+      inp.classList.remove('error');
+      erro.classList.remove('show');
+      mostrarPasso(2);
+      document.getElementById('inputAltura').focus();
+    }
+
+    function irPasso3() {
+      const altVal = parseFloat(document.getElementById('inputAltura').value);
+      const erro   = document.getElementById('erroAltura');
+      const inp    = document.getElementById('inputAltura');
+
+      if (isNaN(altVal) || altVal < 50 || altVal > 280) {
+        inp.classList.add('error');
+        erro.classList.add('show');
+        inp.focus();
+        return;
+      }
+      inp.classList.remove('error');
+      erro.classList.remove('show');
+      mostrarPasso(3);
+      document.getElementById('inputPeso').focus();
+    }
+
+    // ══════════════════════════════════════════════
+    //  CÁLCULO DO IMC
+    // ══════════════════════════════════════════════
+    function calcularIMC() {
+      const pesoVal = parseFloat(document.getElementById('inputPeso').value);
+      const erro    = document.getElementById('erroPeso');
+      const inp     = document.getElementById('inputPeso');
+
+      if (isNaN(pesoVal) || pesoVal < 1 || pesoVal > 500) {
+        inp.classList.add('error');
+        erro.classList.add('show');
+        inp.focus();
+        return;
+      }
+      inp.classList.remove('error');
+      erro.classList.remove('show');
+
+      // ── VARIÁVEIS (requisito d — conversão para float) ──
+      const nome    = String(document.getElementById('inputNome').value.trim());
+      const alturaCm = parseFloat(document.getElementById('inputAltura').value);  // float
+      const peso     = parseFloat(pesoVal);                                        // float
+
+      // ── CONVERSÃO cm → m (requisito e) ──
+      const alturaM = alturaCm / 100;
+
+      // ── FÓRMULA IMC (requisito f): M = peso / altura² ──
+      const alturaQ = alturaM * alturaM;
+      const M = peso / alturaQ;
+      const Mfmt = parseFloat(M.toFixed(2));
+
+      // ── CLASSIFICAÇÃO (requisito g) ──
+      const classif = classificar(Mfmt);
+
+      // ── EXIBIR RESULTADO ──
+      mostrarPasso(4);
+
+      // avatar + nome
+      document.getElementById('resultAvatar').textContent = classif.emoji;
+      document.getElementById('resultAvatar').style.background = classif.cor + '22';
+      document.getElementById('resultNome').textContent  = nome;
+      document.getElementById('resultSub').textContent   = `${alturaCm} cm · ${peso} kg`;
+
+      // ── SAÍDA FORMATADA (requisito h) ──
+      document.getElementById('resultSentence').innerHTML =
+        `<span class="var">${nome}</span> possui índice de massa corporal igual a ` +
+        `<span class="var" style="color:${classif.cor}">${Mfmt}</span>, ` +
+        `sendo classificado(a) como: ` +
+        `<span class="var" style="color:${classif.cor}">${classif.label}</span>.`;
+
+      // IMC grande
+      document.getElementById('imcNumero').textContent = Mfmt;
+      document.getElementById('imcNumero').style.color = classif.cor;
+
+      const badge = document.getElementById('classifBadge');
+      badge.textContent   = classif.label;
+      badge.style.background = classif.cor;
+
+      // régua visual
+      const scalebar = document.getElementById('scalebar');
+      const cores = faixas.map(f => f.cor);
+      scalebar.innerHTML = cores.map((c, i) =>
+        `<div class="scale-seg ${i === classif.idx ? 'active' : ''}" style="background:${c}"></div>`
+      ).join('');
+
+      // detalhes
+      document.getElementById('detAltura').textContent  = `${alturaM.toFixed(2)} m`;
+      document.getElementById('detPeso').textContent    = `${peso} kg`;
+      document.getElementById('detAlturaQ').textContent = `${alturaQ.toFixed(4)} m²`;
+    }
+
+    // ══════════════════════════════════════════════
+    //  REINICIAR
+    // ══════════════════════════════════════════════
+    function reiniciar() {
+      ['inputNome','inputAltura','inputPeso'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('error');
+      });
+      ['erroNome','erroAltura','erroPeso'].forEach(id =>
+        document.getElementById(id).classList.remove('show')
+      );
+      mostrarPasso(1);
+      document.getElementById('inputNome').focus();
+    }
+
+    // ── ENTER para avançar ──
+    document.getElementById('inputNome').addEventListener('keydown',   e => { if (e.key === 'Enter') irPasso2(); });
+    document.getElementById('inputAltura').addEventListener('keydown', e => { if (e.key === 'Enter') irPasso3(); });
+    document.getElementById('inputPeso').addEventListener('keydown',   e => { if (e.key === 'Enter') calcularIMC(); });
+
+    // inicia
+    mostrarPasso(1);
+  </script>
+
+</body>
+</html>

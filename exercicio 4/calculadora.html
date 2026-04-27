@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg:      #f0f4ff;
+      --white:   #ffffff;
+      --ink:     #0f1523;
+      --blue:    #3a5bff;
+      --blue-lt: #eef1ff;
+      --red:     #ff4757;
+      --green:   #2ed573;
+      --muted:   #8892a4;
+      --border:  #e2e8f4;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    /* ── CARD PRINCIPAL ── */
+    .card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 2.5rem 2.5rem 2rem;
+      width: min(480px, 100%);
+      box-shadow: 0 20px 60px rgba(58,91,255,0.1), 0 4px 16px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      animation: slideUp 0.5s ease both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── CABEÇALHO ── */
+    .header { text-align: center; }
+
+    .header-icon {
+      font-size: 2.5rem;
+      line-height: 1;
+      margin-bottom: 0.6rem;
+    }
+
+    .header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── SELETOR DE OPERAÇÃO ── */
+    .op-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .op-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+    }
+
+    .op-btn {
+      border: 2px solid var(--border);
+      background: var(--white);
+      border-radius: 12px;
+      padding: 0.8rem 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.18s;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .op-btn:hover {
+      border-color: var(--blue);
+      background: var(--blue-lt);
+    }
+
+    .op-btn.active {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: white;
+    }
+
+    .op-symbol {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .op-name {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    /* ── INPUTS DOS NÚMEROS ── */
+    .num-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: end;
+      gap: 0.8rem;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    .field label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .field input {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-align: center;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--blue);
+      background: var(--blue-lt);
+    }
+
+    .field input.error { border-color: var(--red); background: #fff5f6; }
+
+    .op-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--blue);
+      padding-bottom: 0.7rem;
+      text-align: center;
+      min-width: 2rem;
+    }
+
+    /* ── BOTÃO CALCULAR ── */
+    .btn-calc {
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 1rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-calc:hover { background: #2845e8; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(58,91,255,0.35); }
+    .btn-calc:active { transform: translateY(0); }
+
+    /* ── RESULTADO ── */
+    .result-box {
+      display: none;
+      background: var(--blue-lt);
+      border: 2px solid var(--blue);
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+      animation: popIn 0.3s ease both;
+    }
+
+    .result-box.error-box {
+      background: #fff5f6;
+      border-color: var(--red);
+    }
+
+    .result-box.visible { display: block; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .result-expr {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--blue);
+      line-height: 1;
+    }
+
+    .result-box.error-box .result-val {
+      font-size: 1rem;
+      color: var(--red);
+    }
+
+    .result-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    /* ── HISTÓRICO ── */
+    .hist-section { width: min(480px, 100%); animation: slideUp 0.5s ease 0.1s both; }
+
+    .hist-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+
+    .hist-header span {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .hist-clear {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .hist-clear:hover { color: var(--red); }
+
+    .hist-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .hist-item {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      border: 1px solid var(--border);
+      animation: slideUp 0.2s ease both;
+    }
+
+    .hist-item .expr { color: var(--muted); }
+    .hist-item .res  { font-weight: 700; color: var(--blue); }
+    .hist-empty {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CARD PRINCIPAL -->
+  <div class="card">
+
+    <!-- CABEÇALHO -->
+    <div class="header">
+      <div class="header-icon">🧮</div>
+      <h1>Calculadora</h1>
+      <p>Selecione a operação e informe os dois números</p>
+    </div>
+
+    <!-- SELEÇÃO DE OPERAÇÃO -->
+    <div>
+      <span class="op-label">Operação</span>
+      <div class="op-grid">
+        <button class="op-btn active" data-op="+" onclick="selecionarOp(this, '+')">
+          <span class="op-symbol">+</span>
+          <span class="op-name">Soma</span>
+        </button>
+        <button class="op-btn" data-op="-" onclick="selecionarOp(this, '-')">
+          <span class="op-symbol">−</span>
+          <span class="op-name">Subtração</span>
+        </button>
+        <button class="op-btn" data-op="*" onclick="selecionarOp(this, '×')">
+          <span class="op-symbol">×</span>
+          <span class="op-name">Multiplicação</span>
+        </button>
+        <button class="op-btn" data-op="/" onclick="selecionarOp(this, '÷')">
+          <span class="op-symbol">÷</span>
+          <span class="op-name">Divisão</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- NÚMEROS -->
+    <div class="num-row">
+      <div class="field">
+        <label for="num1">Número 1</label>
+        <input type="number" id="num1" placeholder="0" />
+      </div>
+      <div class="op-display" id="opDisplay">+</div>
+      <div class="field">
+        <label for="num2">Número 2</label>
+        <input type="number" id="num2" placeholder="0" />
+      </div>
+    </div>
+
+    <!-- BOTÃO -->
+    <button class="btn-calc" onclick="calcular()">
+      <span>＝</span> Calcular
+    </button>
+
+    <!-- RESULTADO -->
+    <div class="result-box" id="resultBox">
+      <div class="result-label">Resultado</div>
+      <div class="result-expr" id="resultExpr"></div>
+      <div class="result-val"  id="resultVal"></div>
+    </div>
+
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="hist-section">
+    <div class="hist-header">
+      <span>Histórico</span>
+      <button class="hist-clear" onclick="limparHistorico()">Limpar</button>
+    </div>
+    <div class="hist-list" id="histList">
+      <div class="hist-empty">Nenhum cálculo ainda.</div>
+    </div>
+  </div>
+
+  <script>
+    // ── ESTADO ──────────────────────────────────
+    let opAtual    = '+';
+    let opSimbolo  = '+';
+    let historico  = [];
+
+    // ── SELECIONAR OPERAÇÃO ──────────────────────
+    function selecionarOp(btn, simbolo) {
+      document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      opAtual   = btn.dataset.op;
+      opSimbolo = simbolo;
+      document.getElementById('opDisplay').textContent = simbolo;
+      // esconde resultado ao trocar operação
+      document.getElementById('resultBox').classList.remove('visible');
+    }
+
+    // ── CALCULAR ────────────────────────────────
+    function calcular() {
+      const n1Input = document.getElementById('num1');
+      const n2Input = document.getElementById('num2');
+      n1Input.classList.remove('error');
+      n2Input.classList.remove('error');
+
+      const v1 = n1Input.value;
+      const v2 = n2Input.value;
+
+      // validação
+      if (v1 === '' || isNaN(v1)) { n1Input.classList.add('error'); n1Input.focus(); return; }
+      if (v2 === '' || isNaN(v2)) { n2Input.classList.add('error'); n2Input.focus(); return; }
+
+      const a = parseFloat(v1);
+      const b = parseFloat(v2);
+
+      let resultado;
+      let erro = null;
+
+      switch (opAtual) {
+        case '+': resultado = a + b; break;
+        case '-': resultado = a - b; break;
+        case '*': resultado = a * b; break;
+        case '/':
+          if (b === 0) { erro = 'Divisão por zero não é permitida.'; }
+          else { resultado = a / b; }
+          break;
+      }
+
+      const box  = document.getElementById('resultBox');
+      const expr = document.getElementById('resultExpr');
+      const val  = document.getElementById('resultVal');
+
+      // reinicia animação
+      box.classList.remove('visible', 'error-box');
+      void box.offsetWidth;
+
+      if (erro) {
+        box.classList.add('visible', 'error-box');
+        expr.textContent = `${a} ${opSimbolo} ${b}`;
+        val.textContent  = erro;
+        return;
+      }
+
+      // formata resultado: remove decimais desnecessários
+      const res = parseFloat(resultado.toFixed(10));
+      const resStr = Number.isInteger(res) ? res.toString() : res.toString();
+
+      box.classList.add('visible');
+      expr.textContent = `${a} ${opSimbolo} ${b} =`;
+      val.textContent  = resStr;
+
+      // adiciona ao histórico
+      adicionarHistorico(`${a} ${opSimbolo} ${b}`, resStr);
+    }
+
+    // ── HISTÓRICO ───────────────────────────────
+    function adicionarHistorico(expr, res) {
+      historico.unshift({ expr, res });
+      if (historico.length > 10) historico.pop();
+      renderHistorico();
+    }
+
+    function renderHistorico() {
+      const list = document.getElementById('histList');
+      if (historico.length === 0) {
+        list.innerHTML = '<div class="hist-empty">Nenhum cálculo ainda.</div>';
+        return;
+      }
+      list.innerHTML = historico.map(h => `
+        <div class="hist-item">
+          <span class="expr">${h.expr} =</span>
+          <span class="res">${h.res}</span>
+        </div>
+      `).join('');
+    }
+
+    function limparHistorico() {
+      historico = [];
+      renderHistorico();
+    }
+
+    // ── ENTER NOS INPUTS ────────────────────────
+    document.getElementById('num1').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('num2').focus(); });
+    document.getElementById('num2').addEventListener('keydown', e => { if (e.key === 'Enter') calcular(); });
+  </script>
+
+</body>
+</html>

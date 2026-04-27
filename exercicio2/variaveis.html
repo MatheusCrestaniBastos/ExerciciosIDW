@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Variáveis JavaScript</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Syne:wght@400;700;800&display=swap');
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #141414;
+      --border: #222;
+      --green: #00ff87;
+      --blue: #60a5fa;
+      --orange: #fb923c;
+      --pink: #f472b6;
+      --yellow: #facc15;
+      --muted: #555;
+      --text: #e5e5e5;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    /* ===== TÍTULO ===== */
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      letter-spacing: -1px;
+      color: #fff;
+      text-align: center;
+    }
+
+    h1 span {
+      color: var(--green);
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-align: center;
+      margin-top: -1rem;
+    }
+
+    /* ===== GRID DE CARDS ===== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px;
+      width: 100%;
+      max-width: 960px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .card {
+      background: var(--surface);
+      padding: 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      transition: background 0.2s;
+    }
+
+    .card:hover { background: #1a1a1a; }
+
+    .card-type {
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .card-declaration {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card-declaration .kw  { color: #c792ea; }
+    .card-declaration .var { color: var(--blue); }
+    .card-declaration .val-str  { color: var(--green); }
+    .card-declaration .val-num  { color: var(--orange); }
+    .card-declaration .val-bool { color: var(--pink); }
+    .card-declaration .op  { color: #89ddff; }
+
+    .card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .card-typeof {
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .typeof-badge {
+      background: #1e1e1e;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    /* cores por tipo */
+    .type-string  .card-type,
+    .type-string  .card-value  { color: var(--green); }
+    .type-string  .typeof-badge { color: var(--green); border-color: var(--green); }
+
+    .type-int     .card-type,
+    .type-int     .card-value  { color: var(--orange); }
+    .type-int     .typeof-badge { color: var(--orange); border-color: var(--orange); }
+
+    .type-float   .card-type,
+    .type-float   .card-value  { color: var(--yellow); }
+    .type-float   .typeof-badge { color: var(--yellow); border-color: var(--yellow); }
+
+    .type-boolean .card-type,
+    .type-boolean .card-value  { color: var(--pink); }
+    .type-boolean .typeof-badge { color: var(--pink); border-color: var(--pink); }
+
+    /* ===== CONSOLE SIMULADO ===== */
+    .console-box {
+      width: 100%;
+      max-width: 960px;
+      background: #000;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .console-bar {
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .console-bar .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-red    { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green  { background: #28c840; }
+
+    .console-bar span {
+      margin-left: auto;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #444;
+    }
+
+    .console-body {
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .console-line {
+      font-size: 0.82rem;
+      line-height: 1.7;
+      display: flex;
+      gap: 0.8rem;
+      align-items: baseline;
+    }
+
+    .console-line .arrow { color: #333; flex-shrink: 0; }
+    .console-line .log-label { color: var(--muted); min-width: 200px; }
+    .console-line .log-val-str  { color: var(--green); }
+    .console-line .log-val-num  { color: var(--orange); }
+    .console-line .log-val-flt  { color: var(--yellow); }
+    .console-line .log-val-bool { color: var(--pink); }
+    .console-line .log-type { color: #60a5fa; }
+
+    .console-divider {
+      height: 1px;
+      background: #1e1e1e;
+      margin: 0.3rem 0;
+    }
+
+    /* ===== BOTÃO ALERT ===== */
+    .btn-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .btn-alert {
+      background: none;
+      border: 1px solid var(--green);
+      color: var(--green);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.8rem 2.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-alert:hover {
+      background: var(--green);
+      color: #000;
+    }
+
+    .btn-hint {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ===== MODAL ALERT SIMULADO ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 12px;
+      width: min(480px, 90vw);
+      overflow: hidden;
+      animation: popIn 0.2s ease both;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-title {
+      background: #252525;
+      padding: 0.8rem 1.2rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #777;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #333;
+    }
+
+    .modal-body {
+      padding: 1.5rem 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .alert-line {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      border-bottom: 1px solid #252525;
+      padding-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .alert-line:last-child { border-bottom: none; }
+
+    .alert-key { color: #888; }
+
+    .modal-ok {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.8rem 1.2rem;
+      border-top: 1px solid #2a2a2a;
+    }
+
+    .modal-ok button {
+      background: var(--green);
+      color: #000;
+      border: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.5rem 1.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+
+    .modal-ok button:hover { opacity: 0.85; }
+
+    .alert-counter {
+      font-size: 0.65rem;
+      color: var(--muted);
+      padding: 0.3rem 1.2rem 0.6rem;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tipos de <span>Variáveis</span> em JS</h1>
+  <p class="subtitle">String · Integer · Float · Boolean</p>
+
+  <!-- CARDS -->
+  <div class="grid">
+
+    <!-- STRING -->
+    <div class="card type-string">
+      <div class="card-type">String</div>
+      <div class="card-declaration">
+        <span class="kw">let</span>
+        <span class="var"> nome</span>
+        <span class="op"> = </span>
+        <span class="val-str">"Corinthians"</span><span>;</span>
+      </div>
+      <div class="card-value">"Corinthians"</div>
+      <div class="card-typeof">
+        <span>typeof nome</span>
+        <span class="typeof-badge">"string"</span>
+      </div>
+    </div>
+
+    <!-- INT -->
+    <div class="card type-int">
+      <div class="card-type">Integer</div>
+      <div class="card-declaration">
+        <span class="kw">let</span>
+        <span class="var"> titulos</span>
+        <span class="op"> = </span>
+        <span class="val-num">30</span><span>;</span>
+      </div>
+      <div class="card-value">30</div>
+      <div class="card-typeof">
+        <span>typeof titulos</span>
+        <span class="typeof-badge">"number"</span>
+      </div>
+    </div>
+
+    <!-- FLOAT -->
+    <div class="card type-float">
+      <div class="card-type">Float</div>
+      <div class="card-declaration">
+        <span class="kw">let</span>
+        <span class="var"> media</span>
+        <span class="op"> = </span>
+        <span class="val-num">3.14</span><span>;</span>
+      </div>
+      <div class="card-value">3.14</div>
+      <div class="card-typeof">
+        <span>typeof media</span>
+        <span class="typeof-badge">"number"</span>
+      </div>
+    </div>
+
+    <!-- BOOLEAN -->
+    <div class="card type-boolean">
+      <div class="card-type">Boolean</div>
+      <div class="card-declaration">
+        <span class="kw">let</span>
+        <span class="var"> campeao</span>
+        <span class="op"> = </span>
+        <span class="val-bool">true</span><span>;</span>
+      </div>
+      <div class="card-value">true</div>
+      <div class="card-typeof">
+        <span>typeof campeao</span>
+        <span class="typeof-badge">"boolean"</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTÃO ALERT -->
+  <div class="btn-area">
+    <button class="btn-alert" onclick="dispararAlertas()">▶ Executar alert()</button>
+    <span class="btn-hint">Clique para ver os alertas sequenciais</span>
+  </div>
+
+  <!-- CONSOLE SIMULADO -->
+  <div class="console-box">
+    <div class="console-bar">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      <span>Console · JavaScript</span>
+    </div>
+    <div class="console-body">
+
+      <div class="console-line">
+        <span class="arrow">▶</span>
+        <span class="log-label">console.log("Valor:", nome)</span>
+        <span class="log-val-str">"Corinthians"</span>
+      </div>
+      <div class="console-line">
+        <span class="arrow">▶</span>
+        <span class="log-label">console.log("Tipo:", typeof nome)</span>
+        <span class="log-type">"string"</span>
+      </div>
+
+      <div class="console-divider"></div>
+
+      <div class="console-line">
+        <span class="arrow">▶</span>
+        <span class="log-label">console.log("Valor:", titulos)</span>
+        <span class="log-val-num">30</span>
+      </div>
+      <div class="console-line">
+        <span class="arrow">▶</span>
+        <span class="log-label">console.log("Tipo:", typeof titulos)</span>
+        <span class="log-type">"number"</span>
+      </div>
+
+      <div class="console-divider"></div>
+
+      <div class="console-line">
+        <span class="arrow">▶</span>
+        <span class="log-label">console.log("Valor:", media)</span>
+        <span class="log-val-flt">3.14</span>
+      </div>
+      <div class="console-line">
+        <span class="arrow">▶</span>
+        <span class="log-label">console.log("Tipo:", typeof media)</span>
+        <span class="log-type">"number"</span>
+      </div>
+
+      <div class="console-divider"></div>
+
+      <div class="console-line">
+        <span class="arrow">▶</span>
+        <span class="log-label">console.log("Valor:", campeao)</span>
+        <span class="log-val-bool">true</span>
+      </div>
+      <div class="console-line">
+        <span class="arrow">▶</span>
+        <span class="log-label">console.log("Tipo:", typeof campeao)</span>
+        <span class="log-type">"boolean"</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL ALERT SIMULADO -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title">⚠ Alert — JavaScript</div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="alert-counter" id="alertCounter"></div>
+      <div class="modal-ok">
+        <button onclick="proximoAlert()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // DECLARAÇÃO DAS VARIÁVEIS
+    // ============================================================
+    let nome    = "Corinthians";   // string
+    let titulos = 30;              // integer (number)
+    let media   = 3.14;           // float   (number)
+    let campeao = true;           // boolean
+
+    // ============================================================
+    // SAÍDA NO CONSOLE
+    // ============================================================
+    console.log("=== VARIÁVEIS JAVASCRIPT ===");
+
+    console.log("Valor de nome:", nome);
+    console.log("Tipo de nome:", typeof nome);
+
+    console.log("Valor de titulos:", titulos);
+    console.log("Tipo de titulos:", typeof titulos);
+
+    console.log("Valor de media:", media);
+    console.log("Tipo de media:", typeof media);
+
+    console.log("Valor de campeao:", campeao);
+    console.log("Tipo de campeao:", typeof campeao);
+
+    // ============================================================
+    // ALERTAS — SEQUENCIAIS (disparados pelo botão)
+    // ============================================================
+    const alertas = [
+      {
+        titulo: "String",
+        linhas: [
+          { key: "Variável",  val: "nome",            cor: "#60a5fa" },
+          { key: "Valor",     val: `"${nome}"`,       cor: "#00ff87" },
+          { key: "typeof",    val: `"${typeof nome}"`,cor: "#00ff87" },
+        ]
+      },
+      {
+        titulo: "Integer (number)",
+        linhas: [
+          { key: "Variável",  val: "titulos",               cor: "#60a5fa" },
+          { key: "Valor",     val: titulos,                 cor: "#fb923c" },
+          { key: "typeof",    val: `"${typeof titulos}"`,   cor: "#fb923c" },
+        ]
+      },
+      {
+        titulo: "Float (number)",
+        linhas: [
+          { key: "Variável",  val: "media",                 cor: "#60a5fa" },
+          { key: "Valor",     val: media,                   cor: "#facc15" },
+          { key: "typeof",    val: `"${typeof media}"`,     cor: "#facc15" },
+        ]
+      },
+      {
+        titulo: "Boolean",
+        linhas: [
+          { key: "Variável",  val: "campeao",               cor: "#60a5fa" },
+          { key: "Valor",     val: campeao,                 cor: "#f472b6" },
+          { key: "typeof",    val: `"${typeof campeao}"`,   cor: "#f472b6" },
+        ]
+      },
+    ];
+
+    let alertIndex = 0;
+
+    function dispararAlertas() {
+      alertIndex = 0;
+      mostrarAlert();
+    }
+
+    function mostrarAlert() {
+      if (alertIndex >= alertas.length) {
+        document.getElementById('modalOverlay').classList.remove('active');
+        return;
+      }
+      const a = alertas[alertIndex];
+      const body = document.getElementById('modalBody');
+      body.innerHTML = a.linhas.map(l => `
+        <div class="alert-line">
+          <span class="alert-key">${l.key}</span>
+          <span style="color:${l.cor}; font-weight:700">${l.val}</span>
+        </div>
+      `).join('');
+      document.getElementById('alertCounter').textContent =
+        `${alertIndex + 1} de ${alertas.length} — ${a.titulo}`;
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function proximoAlert() {
+      alertIndex++;
+      mostrarAlert();
+    }
+  </script>
+
+</body>
+</html>
